@@ -1,9 +1,5 @@
 #-*- coding:utf-8 -*-
-'''
-Created on 2016-3-15
 
-@author: AndyCoder
-'''
 import urllib2
 from bs4 import BeautifulSoup
 import socket
