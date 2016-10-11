@@ -4,7 +4,7 @@ import urllib2
 import sys
 import httplib
 import socket
-
+from html import HtmlToTxt
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -22,9 +22,10 @@ except httplib.BadStatusLine:
 	pass
 
 soup = BeautifulSoup(html, 'html.parser')
-
-for link in soup.find_all('a'):
-	f = open('./hao123.txt','a')
-	f.write(str(link.get('href')) + "\n")
+num = 0
+for link in soup.find_all('a',href=re.compile("^(http|www).*")):
+	num = num + 1
+	HtmlToTxt(str(link.get('href')),str(num))
+	
 	print link.get('href')
 
