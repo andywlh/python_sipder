@@ -1,27 +1,28 @@
 import re
-import urllib
+import urllib2
 from bs4 import BeautifulSoup
 import socket
 import httplib
 import os
-from htmlToStr import HtmlToTxt
+
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 def getBsObj(url):
-	request = urllib2.Request(self.url)
-    request.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1; \WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36')
-    try:
-        html = urllib2.urlopen(request)
-    except socket.timeout, e:
-        pass
-    except urllib2.URLError,ee:
-        pass
-    except httplib.BadStatusLine:
-        pass
-    bsObj = BeautifulSoup(html)
-    return bsObj
+	request = urllib2.Request(url)
+	request.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1; \WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36')
+	try:
+	    html = urllib2.urlopen(request)
+	except socket.timeout, e:
+	    pass
+	except urllib2.URLError,ee:
+	    pass
+	except httplib.BadStatusLine:
+	    pass
+	bsObj = BeautifulSoup(html,'html.parser')
+
+	return bsObj
 
 def getExternalLinks(bsObj,excludeUrl):
 	externalLinks = []
@@ -36,6 +37,7 @@ def getInternalLinks(bsObj,includeUrl):
 	internalLinks = []
 	for link in bsObj.find_all('a',href = re.compile("^(/|.*"+includeUrl+")")):
 		if link.attrs['href'] is not None:
+			print link.attrs['href']
 			if link.attrs['href'] not in internalLinks:
 				internalLinks.append(link.attrs['href'])
 	return internalLinks
@@ -70,8 +72,9 @@ def getAllInLinks(url):
 			getAllInLinks(splitUrl(url)[0]+link)
 
 getAllInLinks("http://m.sohu.com")
-f.open('./sohu.txt','a')
+f = open('./sohu.txt','a')
 for link in allInLinks:
+	print link+'11111all'
 	f.write(link+'\n')
 
 
