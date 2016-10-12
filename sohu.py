@@ -8,10 +8,8 @@ import sys
 import re
 
 
-global count
-count =0 
 class Spider(object):
-    """Spider"""
+    
     def __init__(self, url):
         self.url = url
 
@@ -30,54 +28,23 @@ class Spider(object):
 
         soup = BeautifulSoup(html,'html.parser')
         for link in soup.find_all('a'):
-            if link.get('href'):
-                print("http://m.sohu.com" + link.get('href')+'\n')
-                if link.get('href')[0] == '/':
-                    urls.append("http://m.sohu.com" + link.get('href'))
-                    
-                            
+            print("http://m.sohu.com" + link.get('href'))
+            if link.get('href')[0] == '/':
+                urls.append("http://m.sohu.com" + link.get('href'))
         return urls
 
-def getPages(url):
-    
-    s = Spider(url)
-    urls = s.getNextUrls()
-    r = urls
-    for url in urls:
-        request = urllib2.Request(url)
-        request.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1; \WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36')
-        try:
-            html = urllib2.urlopen(request)
-        except socket.timeout, e:
-            pass
-        except urllib2.URLError,ee:
-            pass
-        except httplib.BadStatusLine:
-            pass
-        soup = BeautifulSoup(html,'html.parser')
-        for link in soup.find_all('a'):
-            if link.get('href') and link.get('href')[0] == '/' :
-                print("http://m.sohu.com" + link.get('href')+'\n')
-                if ("http://m.sohu.com" + link.get('href')) not in urls:
-                    r.append("http://m.sohu.com" + link.get('href'))
-    return r                
-
-
-
-def saveNews(url):
-    global count 
-    global html1
+def getNews(url):
+    global html
     print url
     xinwen = ''
     request = urllib2.Request(url)
     request.add_header('User-Agent','Mozilla/5.0 (Windows NT 6.1; \WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36')
     try:
-        html1 = urllib2.urlopen(request,timeout=10)
+        html = urllib2.urlopen(request)
     except urllib2.HTTPError, e:
-        pass
-    except socket.timeout, e:
-        pass
-    soup = BeautifulSoup(html1,'html.parser')
+        print e.code
+
+    soup = BeautifulSoup(html,'html.parser')
     for news in soup.select('p.para'):
         xinwen += news.get_text().decode('utf-8')
 
@@ -91,17 +58,8 @@ def saveNews(url):
     source = url
     type = ''
     content = xinwen
-    n = News(source,title,time,content,type)
-    print "2211"
-    if n.title:
-        count = count +1
-        file = open('/home/wan/news/'+str(count)+'.txt','a')
-        file.write("标题："+str(n.title)+"   地址："+n.source+"    时间："+str(n.time)+"\n")
-        file.write("正文：\n"+n.content)
-        file.write("\n")
-        file.close()
-        print "---------------------------"#-*- coding:utf-8 -*-
-    
+    N = News(source,title,time,content,type)
+    return N
 
 
 class News(object):
@@ -122,22 +80,18 @@ class News(object):
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
-source = "http://m.sohu.com"
-urls = Spider(source).getNextUrls()
-urls2 =[]
-for url in urls:
-    print "1111"
-    saveNews(url)
-    temp = Spider(url).getNextUrls()
-    for n in temp:
-        if n not in urls2:
-            urls2.append(n)
-            print "22222"
-            saveNews(n)
-
-    
-
-
-
-        
+num =0
+for i in range(38,50):
+    for j in range(1,5):
+        url = "http://m.sohu.com/cr/" + str(i) + "/?page=" + str(j)
+        print url
+        s = Spider(url)
+        for newsUrl in s.getNextUrls():
+            n = getNews(newsUrl)
+            if n.title:
+                num = num+1
+                file = open('../news/'+str(num)+'.txt','a')
+                file.write("标题："+str(n.title)+"   地址："+n.source+"    时间："+str(n.time)+"\n")
+                file.write("正文：\n"+n.content)
+                file.write("\n")
+                print "---------------------------"
